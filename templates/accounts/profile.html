@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} — BandBunk{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="layout-sidebar">
+
+    <!-- Main -->
+    <div>
+      <!-- Profile header -->
+      <div class="flex-gap mb-4" style="align-items:flex-start;">
+        {% if profile_user.profile_photo %}
+          <img src="{{ profile_user.profile_photo.url }}" class="avatar avatar--xl" alt="{{ profile_user.username }}">
+        {% else %}
+          <div class="avatar avatar--xl">{{ profile_user.username|first|upper }}</div>
+        {% endif %}
+        <div>
+          <h2 class="mb-0">{{ profile_user.get_full_name|default:profile_user.username }}</h2>
+          <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+          <div class="flex-gap gap-sm" style="flex-wrap:wrap;">
+            <span class="badge badge--purple">{{ profile_user.get_user_type_display }}</span>
+            {% if profile_user.is_verified_artist %}<span class="badge badge--green">✓ Verified Artist</span>{% endif %}
+            {% if profile_user.location %}<span class="badge badge--grey">📍 {{ profile_user.location }}</span>{% endif %}
+          </div>
+          {% if profile_user.bio %}
+          <p class="mt-3" style="max-width:560px;">{{ profile_user.bio }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Social links -->
+      {% if profile_user.is_artist %}
+      <div class="flex-gap gap-sm mb-4" style="flex-wrap:wrap;">
+        {% if profile_user.facebook_url %}<a href="{{ profile_user.facebook_url }}" target="_blank" class="btn btn--ghost btn--sm">📘 Facebook</a>{% endif %}
+        {% if profile_user.instagram_url %}<a href="{{ profile_user.instagram_url }}" target="_blank" class="btn btn--ghost btn--sm">📸 Instagram</a>{% endif %}
+        {% if profile_user.youtube_url %}<a href="{{ profile_user.youtube_url }}" target="_blank" class="btn btn--ghost btn--sm">▶ YouTube</a>{% endif %}
+        {% if profile_user.bandcamp_url %}<a href="{{ profile_user.bandcamp_url }}" target="_blank" class="btn btn--ghost btn--sm">🎵 Bandcamp</a>{% endif %}
+        {% if profile_user.spotify_url %}<a href="{{ profile_user.spotify_url }}" target="_blank" class="btn btn--ghost btn--sm">🎧 Spotify</a>{% endif %}
+      </div>
+      {% endif %}
+
+      <hr class="divider">
+
+      <!-- Host reviews -->
+      {% if host_reviews %}
+      <h4 class="mb-3">Reviews as Host</h4>
+      {% for review in host_reviews %}
+      <div class="review-card mb-3">
+        <div class="review-card__header">
+          {% if review.reviewer.profile_photo %}
+            <img src="{{ review.reviewer.profile_photo.url }}" class="avatar avatar--sm" alt="{{ review.reviewer.username }}">
+          {% else %}
+            <div class="avatar avatar--sm">{{ review.reviewer.username|first|upper }}</div>
+          {% endif %}
+          <div>
+            <strong style="font-size:0.9rem;">{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
+            <div class="review-card__meta">{{ review.created_at|date:"F Y" }}</div>
+          </div>
+          <span style="margin-left:auto; color:var(--purple-bright);">
+            {% for i in "12345" %}{% if forloop.counter <= review.overall_rating %}★{% else %}☆{% endif %}{% endfor %}
+          </span>
+        </div>
+        <p style="font-size:0.9rem;">{{ review.body }}</p>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- Artist reviews -->
+      {% if artist_reviews %}
+      <h4 class="mb-3 mt-4">Reviews as Artist</h4>
+      {% for review in artist_reviews %}
+      <div class="review-card mb-3">
+        <div class="review-card__header">
+          {% if review.reviewer.profile_photo %}
+            <img src="{{ review.reviewer.profile_photo.url }}" class="avatar avatar--sm" alt="{{ review.reviewer.username }}">
+          {% else %}
+            <div class="avatar avatar--sm">{{ review.reviewer.username|first|upper }}</div>
+          {% endif %}
+          <div>
+            <strong style="font-size:0.9rem;">{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
+            <div class="review-card__meta">{{ review.created_at|date:"F Y" }}</div>
+          </div>
+          <span style="margin-left:auto; color:var(--purple-bright);">
+            {% for i in "12345" %}{% if forloop.counter <= review.overall_rating %}★{% else %}☆{% endif %}{% endfor %}
+          </span>
+        </div>
+        <p style="font-size:0.9rem;">{{ review.body }}</p>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      {% if not host_reviews and not artist_reviews %}
+      <div class="empty-state" style="padding:2rem 0;">
+        <p>No reviews yet.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-sticky">
+      <div class="card p-4">
+        <h5 class="mb-3">Ratings</h5>
+        {% with profile_user.average_rating_as_host as rating %}
+        {% if rating %}
+        <div class="flex-between mb-2">
+          <span class="text-muted" style="font-size:0.85rem;">As host</span>
+          <span style="color:var(--purple-bright);">★ {{ rating }}</span>
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% with profile_user.average_rating_as_artist as rating %}
+        {% if rating %}
+        <div class="flex-between mb-2">
+          <span class="text-muted" style="font-size:0.85rem;">As artist</span>
+          <span style="color:var(--purple-bright);">★ {{ rating }}</span>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <p class="text-muted mt-2" style="font-size:0.8rem;">Member since {{ profile_user.date_joined_display|date:"F Y" }}</p>
+      </div>
+
+      {% if profile_user.is_host and user != profile_user %}
+      <div class="card p-4 mt-3">
+        <h5 class="mb-2">Listings by {{ profile_user.username }}</h5>
+        {% with profile_user.listings.all as host_listings %}
+        {% for listing in host_listings|slice:":3" %}
+        <a href="{% url 'listings:detail' listing.pk %}" style="display:block; color:var(--white); padding:0.5rem 0; border-bottom:1px solid var(--dark-3); font-size:0.88rem; text-decoration:none;">
+          {{ listing.get_type_icon }} {{ listing.title }}
+          <span style="color:var(--grey-2); font-size:0.8rem; display:block;">{{ listing.town_city }} · £{{ listing.price_per_night }}/night</span>
+        </a>
+        {% empty %}
+        <p class="text-muted" style="font-size:0.85rem;">No active listings.</p>
+        {% endfor %}
+        {% endwith %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

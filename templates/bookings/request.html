@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Request a Bunk — {{ listing.title }}{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+
+    <a href="{% url 'listings:detail' listing.pk %}" class="text-muted" style="font-size:0.85rem;">← Back to listing</a>
+
+    <h1 class="mt-3 mb-1">Request This Bunk</h1>
+    <p class="text-muted mb-4">{{ listing.title }} · {{ listing.town_city }} · £{{ listing.price_per_night }}/night</p>
+
+    <div class="card p-4">
+      <form method="post">
+        {% csrf_token %}
+
+        <h5 class="mb-3">Your Dates</h5>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_check_in">Check-in date</label>
+            {{ form.check_in }}
+            {% if form.check_in.errors %}<p class="form-error">{{ form.check_in.errors|join:", " }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_check_out">Check-out date</label>
+            {{ form.check_out }}
+            {% if form.check_out.errors %}<p class="form-error">{{ form.check_out.errors|join:", " }}</p>{% endif %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_num_guests">Number of people sleeping</label>
+          {{ form.num_guests }}
+          <p class="form-help">Max {{ listing.max_guests }} guest{{ listing.max_guests|pluralize }}</p>
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Your Gig Details</h5>
+        <p class="text-muted mb-3" style="font-size:0.85rem;">
+          Your host needs to know you're genuinely playing a gig nearby. This is how we keep BandBunk real.
+        </p>
+
+        <div class="form-group">
+          <label for="id_band_name">Band / artist name</label>
+          {{ form.band_name }}
+          {% if form.band_name.errors %}<p class="form-error">{{ form.band_name.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_gig_date">Gig date</label>
+            {{ form.gig_date }}
+            {% if form.gig_date.errors %}<p class="form-error">{{ form.gig_date.errors|join:", " }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_venue_name">Venue name</label>
+            {{ form.venue_name }}
+            {% if form.venue_name.errors %}<p class="form-error">{{ form.venue_name.errors|join:", " }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_venue_address">Venue address</label>
+          {{ form.venue_address }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_social_proof_url">{{ form.fields.social_proof_url.label }}</label>
+          {{ form.social_proof_url }}
+          <p class="form-help">Facebook event, Eventbrite, Songkick, Instagram post — anything that shows you're really playing.</p>
+          {% if form.social_proof_url.errors %}<p class="form-error">{{ form.social_proof_url.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Message to Host</h5>
+        <div class="form-group">
+          <label for="id_message_to_host">Anything else the host should know? (optional)</label>
+          {{ form.message_to_host }}
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error mb-3">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Price preview -->
+        <div id="price-preview" style="background:var(--dark-2); border:1px solid var(--purple-border); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem; display:none;">
+          <div class="flex-between">
+            <span class="text-muted">£{{ listing.price_per_night }} × <span id="nights-count">—</span> nights</span>
+            <span style="font-family:var(--font-display); font-size:1.5rem;" id="total-price">—</span>
+          </div>
+          <p class="text-muted mt-1" style="font-size:0.78rem;">Payment is taken when the host confirms your booking.</p>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block btn--lg">Send Booking Request 🎸</button>
+        <p class="text-center text-muted mt-2" style="font-size:0.78rem;">
+          The host will review your request and confirm or decline within 48 hours.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const checkIn   = document.getElementById('id_check_in');
+const checkOut  = document.getElementById('id_check_out');
+const preview   = document.getElementById('price-preview');
+const nightsEl  = document.getElementById('nights-count');
+const totalEl   = document.getElementById('total-price');
+const pricePerNight = {{ listing.price_per_night }};
+
+function updatePrice() {
+  if (checkIn.value && checkOut.value) {
+    const d1 = new Date(checkIn.value);
+    const d2 = new Date(checkOut.value);
+    const nights = Math.round((d2 - d1) / 86400000);
+    if (nights > 0) {
+      nightsEl.textContent = nights;
+      totalEl.textContent  = '£' + (nights * pricePerNight).toFixed(2);
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+}
+checkIn.addEventListener('change', updatePrice);
+checkOut.addEventListener('change', updatePrice);
+</script>
+{% endblock %}

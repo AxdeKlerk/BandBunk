@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto; text-align:center;">
+    <h2 style="color:var(--green);">✓ Payment Successful</h2>
+    {% if booking %}
+      <p class="mt-2">You're locked in for <strong>{{ booking.band_name }}</strong> at
+      <a href="{% url 'listings:detail' booking.listing.pk %}">{{ booking.listing.title }}</a>.</p>
+      <p class="mt-1 text-muted">{{ booking.check_in|date:"l d F Y" }} → {{ booking.check_out|date:"l d F Y" }}</p>
+      <a href="{% url 'bookings:detail' booking.pk %}" class="btn btn--primary mt-4">View Booking</a>
+    {% else %}
+      <p class="mt-2">Your payment is being processed. Check <a href="{% url 'bookings:my_bookings' %}">My Bookings</a> shortly for confirmation.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

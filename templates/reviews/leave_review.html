@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Leave a Review{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+
+    <a href="{% url 'bookings:my_bookings' %}" class="text-muted" style="font-size:0.85rem;">← Back to bookings</a>
+
+    <h1 class="mt-3 mb-1">
+      {% if review_type == 'host' %}Review Your Host{% else %}Review the Band{% endif %}
+    </h1>
+    <p class="text-muted mb-4">
+      {% if review_type == 'host' %}
+        How was your stay with <strong>{{ reviewed_user.get_full_name|default:reviewed_user.username }}</strong>? Be honest — the community depends on it.
+      {% else %}
+        How did <strong>{{ booking.band_name }}</strong> treat your space? Let other hosts know.
+      {% endif %}
+    </p>
+
+    <div class="card p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Overall rating -->
+        <div class="form-group mb-4">
+          <label>Overall rating</label>
+          <div class="star-rating-input mt-2">
+            {% for i in "54321" %}
+            <input type="radio" name="overall_rating" id="overall_{{ i }}" value="{{ i }}" {% if form.overall_rating.value == i %}checked{% endif %} required>
+            <label for="overall_{{ i }}">★</label>
+            {% endfor %}
+          </div>
+          {% if form.overall_rating.errors %}<p class="form-error mt-1">{{ form.overall_rating.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <hr class="divider">
+
+        <!-- Category ratings -->
+        <div class="grid grid-3 mb-4">
+          <div class="form-group">
+            <label>🧹 Cleanliness</label>
+            <div class="star-rating-input mt-1" style="font-size:1.2rem;">
+              {% for i in "54321" %}
+              <input type="radio" name="cleanliness_rating" id="clean_{{ i }}" value="{{ i }}" {% if form.cleanliness_rating.value == i %}checked{% endif %}>
+              <label for="clean_{{ i }}" style="font-size:1.2rem;">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label>🔇 Noise / Respect</label>
+            <div class="star-rating-input mt-1" style="font-size:1.2rem;">
+              {% for i in "54321" %}
+              <input type="radio" name="noise_rating" id="noise_{{ i }}" value="{{ i }}" {% if form.noise_rating.value == i %}checked{% endif %}>
+              <label for="noise_{{ i }}" style="font-size:1.2rem;">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label>🤝 Hospitality</label>
+            <div class="star-rating-input mt-1" style="font-size:1.2rem;">
+              {% for i in "54321" %}
+              <input type="radio" name="hospitality_rating" id="hosp_{{ i }}" value="{{ i }}" {% if form.hospitality_rating.value == i %}checked{% endif %}>
+              <label for="hosp_{{ i }}" style="font-size:1.2rem;">★</label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="form-group mb-4">
+          <label>Your review</label>
+          {{ form.body }}
+          {% if form.body.errors %}<p class="form-error">{{ form.body.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="flex-gap">
+          <button type="submit" class="btn btn--primary btn--lg">Submit Review 🤘</button>
+          <a href="{% url 'bookings:my_bookings' %}" class="btn btn--ghost">Skip for now</a>
+        </div>
+
+        <p class="text-muted mt-3" style="font-size:0.78rem;">
+          Reviews are public and cannot be edited once submitted. Keep it honest, keep it fair.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

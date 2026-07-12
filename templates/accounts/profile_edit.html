@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+    <h1 class="mb-4">Edit Profile</h1>
+
+    <div class="card p-4">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <h5 class="mb-3">Basic Info</h5>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="form-group">
+            <label>Last name</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Town / City</label>
+            {{ form.location }}
+          </div>
+          <div class="form-group">
+            <label>Phone (optional)</label>
+            {{ form.phone }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Bio</label>
+          {{ form.bio }}
+          <p class="form-help">Tell the community who you are — band name, genre, how long you've been into the scene.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Profile photo</label>
+          {% if user.profile_photo %}
+            <div class="mb-2">
+              <img src="{{ user.profile_photo.url }}" class="avatar avatar--lg" id="photo-preview" alt="Current photo">
+            </div>
+          {% else %}
+            <img src="" class="avatar avatar--lg" id="photo-preview" style="display:none;" alt="Preview">
+          {% endif %}
+          {{ form.profile_photo }}
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Account Type</h5>
+        <div class="form-group">
+          <label>I am...</label>
+          <select name="user_type" id="id_user_type">
+            {% for val, label in form.fields.user_type.choices %}
+            <option value="{{ val }}" {% if form.user_type.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <hr class="divider">
+
+        <div id="social-section">
+          <h5 class="mb-1">Social & Music Links</h5>
+          <p class="text-muted mb-3" style="font-size:0.85rem;">
+            Artists must provide at least one link so hosts can verify you're a real band. These appear on your public profile.
+          </p>
+
+          <div class="form-group">
+            <label>Facebook page or event URL</label>
+            {{ form.facebook_url }}
+          </div>
+          <div class="form-group">
+            <label>Instagram profile URL</label>
+            {{ form.instagram_url }}
+          </div>
+          <div class="form-group">
+            <label>YouTube channel URL</label>
+            {{ form.youtube_url }}
+          </div>
+          <div class="form-group">
+            <label>Bandcamp URL</label>
+            {{ form.bandcamp_url }}
+          </div>
+          <div class="form-group">
+            <label>Spotify artist URL</label>
+            {{ form.spotify_url }}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error mb-3">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="flex-gap mt-3">
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+          <a href="{% url 'accounts:dashboard' %}" class="btn btn--ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Photo preview
+const photoInput = document.querySelector('input[name="profile_photo"]');
+const photoPreview = document.getElementById('photo-preview');
+if (photoInput && photoPreview) {
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        photoPreview.src = e.target.result;
+        photoPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+</script>
+{% endblock %}

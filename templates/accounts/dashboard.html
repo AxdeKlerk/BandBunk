@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+
+  <!-- Header -->
+  <div class="flex-between mb-4" style="flex-wrap:wrap; gap:1rem;">
+    <div class="flex-gap">
+      {% if user.profile_photo %}
+        <img src="{{ user.profile_photo.url }}" class="avatar avatar--lg" alt="{{ user.username }}">
+      {% else %}
+        <div class="avatar avatar--lg">{{ user.username|first|upper }}</div>
+      {% endif %}
+      <div>
+        <h2 class="mb-0">{{ user.get_full_name|default:user.username }}</h2>
+        <p class="text-muted mb-1">@{{ user.username }}</p>
+        <div class="flex-gap gap-sm">
+          <span class="badge badge--purple">{{ user.get_user_type_display }}</span>
+          {% if user.is_verified_artist %}
+            <span class="badge badge--green">✓ Verified Artist</span>
+          {% endif %}
+          {% if user.location %}<span class="badge badge--grey">📍 {{ user.location }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'accounts:profile_edit' %}" class="btn btn--outline btn--sm">Edit Profile</a>
+  </div>
+
+  <!-- Social links -->
+  {% if user.is_artist %}
+  <div class="flex-gap gap-sm mb-4" style="flex-wrap:wrap;">
+    {% if user.facebook_url %}<a href="{{ user.facebook_url }}" target="_blank" class="btn btn--ghost btn--sm">Facebook</a>{% endif %}
+    {% if user.instagram_url %}<a href="{{ user.instagram_url }}" target="_blank" class="btn btn--ghost btn--sm">Instagram</a>{% endif %}
+    {% if user.youtube_url %}<a href="{{ user.youtube_url }}" target="_blank" class="btn btn--ghost btn--sm">YouTube</a>{% endif %}
+    {% if user.bandcamp_url %}<a href="{{ user.bandcamp_url }}" target="_blank" class="btn btn--ghost btn--sm">Bandcamp</a>{% endif %}
+    {% if user.spotify_url %}<a href="{{ user.spotify_url }}" target="_blank" class="btn btn--ghost btn--sm">Spotify</a>{% endif %}
+    {% if not user.has_social_link %}
+      <a href="{% url 'accounts:profile_edit' %}" class="badge badge--red">⚠ Add a social link to book bunks</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Stats row -->
+  <div class="grid grid-4 mb-6">
+    {% if user.is_host %}
+    <div class="stat-card">
+      <span class="stat-card__value">{{ listings|length }}</span>
+      <span class="stat-card__label">Listings</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__value">{{ bookings_as_host|length }}</span>
+      <span class="stat-card__label">Stays Hosted</span>
+    </div>
+    {% endif %}
+    {% if user.is_artist %}
+    <div class="stat-card">
+      <span class="stat-card__value">{{ bookings_as_artist|length }}</span>
+      <span class="stat-card__label">Bookings Made</span>
+    </div>
+    {% with user.average_rating_as_artist as rating %}
+    <div class="stat-card">
+      <span class="stat-card__value" style="color:var(--purple-bright);">
+        {% if rating %}{{ rating }}★{% else %}—{% endif %}
+      </span>
+      <span class="stat-card__label">Artist Rating</span>
+    </div>
+    {% endwith %}
+    {% endif %}
+    {% with user.average_rating_as_host as rating %}
+    {% if user.is_host %}
+    <div class="stat-card">
+      <span class="stat-card__value" style="color:var(--purple-bright);">
+        {% if rating %}{{ rating }}★{% else %}—{% endif %}
+      </span>
+      <span class="stat-card__label">Host Rating</span>
+    </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="grid grid-2" style="gap:2.5rem; align-items:start;">
+
+    <!-- LISTINGS PANEL -->
+    {% if user.is_host %}
+    <div>
+      <div class="flex-between mb-3">
+        <h4>My Listings</h4>
+        <a href="{% url 'listings:create' %}" class="btn btn--primary btn--sm">+ New listing</a>
+      </div>
+      {% if listings %}
+        {% for listing in listings %}
+        <div class="card mb-2" style="padding:1rem 1.25rem;">
+          <div class="flex-between">
+            <div>
+              <span style="font-size:1rem; margin-right:0.5rem;">{{ listing.get_type_icon }}</span>
+              <strong style="font-size:0.95rem;">{{ listing.title }}</strong>
+              <p class="text-muted" style="font-size:0.82rem; margin-top:0.2rem;">{{ listing.town_city }} · £{{ listing.price_per_night }}/night</p>
+            </div>
+            <div class="flex-gap gap-sm">
+              {% if listing.is_active %}
+                <span class="badge badge--green">Live</span>
+              {% else %}
+                <span class="badge badge--grey">Paused</span>
+              {% endif %}
+              <a href="{% url 'listings:edit' listing.pk %}" class="btn btn--ghost btn--sm">Edit</a>
+              <a href="{% url 'listings:toggle' listing.pk %}" class="btn btn--ghost btn--sm">
+                {% if listing.is_active %}Pause{% else %}Activate{% endif %}
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        <a href="{% url 'listings:my_listings' %}" class="btn btn--ghost btn--sm mt-2">View all →</a>
+      {% else %}
+        <div class="empty-state" style="padding:2rem 0;">
+          <span class="empty-state__icon">🛋️</span>
+          <h3>No listings yet</h3>
+          <p>Got a spare sofa? Post it and help a band out.</p>
+          <a href="{% url 'listings:create' %}" class="btn btn--primary mt-3">Create your first listing</a>
+        </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- RECENT BOOKINGS -->
+    <div>
+      <div class="flex-between mb-3">
+        <h4>Recent Bookings</h4>
+        <a href="{% url 'bookings:my_bookings' %}" class="btn btn--ghost btn--sm">View all →</a>
+      </div>
+
+      {% if bookings_as_artist %}
+        {% for booking in bookings_as_artist %}
+        <div class="card mb-2" style="padding:1rem 1.25rem;">
+          <div class="flex-between">
+            <div>
+              <strong style="font-size:0.9rem;">{{ booking.listing.title }}</strong>
+              <p class="text-muted" style="font-size:0.8rem; margin-top:0.2rem;">
+                {{ booking.check_in|date:"d M" }} → {{ booking.check_out|date:"d M Y" }}
+              </p>
+            </div>
+            {% if booking.status == 'pending' %}
+              <span class="badge badge--amber">Pending</span>
+            {% elif booking.status == 'confirmed' %}
+              <span class="badge badge--green">Confirmed</span>
+            {% elif booking.status == 'completed' %}
+              <span class="badge badge--purple">Done</span>
+            {% elif booking.status == 'declined' %}
+              <span class="badge badge--red">Declined</span>
+            {% else %}
+              <span class="badge badge--grey">{{ booking.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% elif bookings_as_host %}
+        {% for booking in bookings_as_host %}
+        <div class="card mb-2" style="padding:1rem 1.25rem;">
+          <div class="flex-between">
+            <div>
+              <strong style="font-size:0.9rem;">{{ booking.band_name }}</strong>
+              <p class="text-muted" style="font-size:0.8rem; margin-top:0.2rem;">
+                {{ booking.check_in|date:"d M" }} → {{ booking.check_out|date:"d M Y" }}
+              </p>
+            </div>
+            {% if booking.status == 'pending' %}
+              <span class="badge badge--amber">Needs response</span>
+            {% elif booking.status == 'confirmed' %}
+              <span class="badge badge--green">Confirmed</span>
+            {% elif booking.status == 'completed' %}
+              <span class="badge badge--purple">Done</span>
+            {% else %}
+              <span class="badge badge--grey">{{ booking.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:2rem 0;">
+          <span class="empty-state__icon">🗓️</span>
+          <h3>No bookings yet</h3>
+          <a href="{% url 'listings:browse' %}" class="btn btn--primary mt-3">Find A Bunk</a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

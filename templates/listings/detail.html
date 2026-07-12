@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ listing.title }}{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+
+  <!-- Breadcrumb -->
+  <p class="text-muted mb-3" style="font-size:0.85rem;">
+    <a href="{% url 'listings:browse' %}">Find A Bunk</a> /
+    <a href="{% url 'listings:browse' %}?q={{ listing.town_city }}">{{ listing.town_city }}</a> /
+    {{ listing.title }}
+  </p>
+
+  <div class="layout-sidebar">
+
+    <!-- ── MAIN COLUMN ──────────────────────────────────── -->
+    <div>
+
+      <!-- Photos -->
+      <div style="border-radius:var(--radius-lg); overflow:hidden; margin-bottom:2rem; background:var(--dark-2); aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;">
+        {% with listing.photos.first as primary %}
+          {% if primary %}
+            <img src="{{ primary.image.url }}" alt="{{ listing.title }}" style="width:100%; height:100%; object-fit:cover;">
+          {% else %}
+            <span style="font-size:6rem;">{{ listing.get_type_icon }}</span>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      {% if listing.photos.count > 1 %}
+      <div style="display:flex; gap:0.5rem; margin-bottom:2rem; overflow-x:auto; padding-bottom:0.5rem;">
+        {% for photo in listing.photos.all %}
+        <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" style="height:80px; width:120px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--dark-4); flex-shrink:0;">
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Title -->
+      <div class="flex-between mb-1">
+        <h1 style="font-size:2.5rem;">{{ listing.title }}</h1>
+        <span class="badge badge--purple">{{ listing.get_listing_type_display }}</span>
+      </div>
+      <p class="text-muted mb-3">📍 {{ listing.town_city }}, {{ listing.postcode }}</p>
+
+      <!-- Rating -->
+      {% with listing.average_rating as rating %}
+      {% if rating %}
+      <div class="flex-gap mb-3">
+        <span style="color:var(--purple-bright);">★ {{ rating }}</span>
+        <span class="text-muted">{{ listing.review_count }} review{{ listing.review_count|pluralize }}</span>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <hr class="divider">
+
+      <!-- Host -->
+      <div class="flex-gap mb-4">
+        {% if listing.host.profile_photo %}
+          <img src="{{ listing.host.profile_photo.url }}" class="avatar avatar--md" alt="{{ listing.host.username }}">
+        {% else %}
+          <div class="avatar avatar--md">{{ listing.host.username|first|upper }}</div>
+        {% endif %}
+        <div>
+          <p class="mb-0"><strong>Hosted by <a href="{% url 'accounts:profile' listing.host.username %}">{{ listing.host.get_full_name|default:listing.host.username }}</a></strong></p>
+          <p class="text-muted" style="font-size:0.82rem;">Member since {{ listing.host.date_joined_display|date:"F Y" }}</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Description -->
+      <h4 class="mb-2">About this bunk</h4>
+      <p>{{ listing.description|linebreaksbr }}</p>
+
+      <hr class="divider">
+
+      <!-- Amenities -->
+      <h4 class="mb-3">What's included</h4>
+      <div class="amenities">
+        {% if listing.includes_breakfast %}<span class="amenity amenity--active">☕ Tea/coffee & toast</span>{% endif %}
+        {% if listing.has_wifi %}<span class="amenity amenity--active">📶 WiFi</span>{% endif %}
+        {% if listing.has_parking %}<span class="amenity amenity--active">🚗 Parking</span>{% endif %}
+        {% if listing.allows_instruments %}<span class="amenity amenity--active">🎸 Instruments welcome</span>{% endif %}
+        {% if listing.is_pet_friendly %}<span class="amenity amenity--active">🐾 Pet friendly</span>{% endif %}
+        {% if listing.has_shower %}<span class="amenity amenity--active">🚿 Shower</span>{% endif %}
+        {% if not listing.includes_breakfast and not listing.has_wifi and not listing.has_parking and not listing.allows_instruments %}
+          <span class="text-muted" style="font-size:0.85rem;">Basic stay — bed and basic hospitality.</span>
+        {% endif %}
+      </div>
+
+      {% if listing.house_rules %}
+      <hr class="divider">
+      <h4 class="mb-2">House rules</h4>
+      <p>{{ listing.house_rules|linebreaksbr }}</p>
+      {% if listing.noise_curfew %}
+      <p class="mt-2"><span class="badge badge--amber">🔇 Noise curfew: {{ listing.noise_curfew|time:"H:i" }}</span></p>
+      {% endif %}
+      {% endif %}
+
+      <hr class="divider">
+
+      <!-- Reviews -->
+      <h4 class="mb-3">
+        Reviews
+        {% if listing.review_count %}<span class="badge badge--purple ml-2">{{ listing.review_count }}</span>{% endif %}
+      </h4>
+
+      {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card mb-3">
+          <div class="review-card__header">
+            {% if review.reviewer.profile_photo %}
+              <img src="{{ review.reviewer.profile_photo.url }}" class="avatar avatar--sm" alt="{{ review.reviewer.username }}">
+            {% else %}
+              <div class="avatar avatar--sm">{{ review.reviewer.username|first|upper }}</div>
+            {% endif %}
+            <div>
+              <strong style="font-size:0.9rem;">{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
+              <div class="review-card__meta">{{ review.created_at|date:"F Y" }}</div>
+            </div>
+            <div class="ml-auto" style="margin-left:auto;">
+              <span style="color:var(--purple-bright);">
+                {% for i in "12345" %}{% if forloop.counter <= review.overall_rating %}★{% else %}☆{% endif %}{% endfor %}
+              </span>
+            </div>
+          </div>
+          <p style="font-size:0.9rem;">{{ review.body }}</p>
+          {% if review.cleanliness_rating or review.noise_rating or review.hospitality_rating %}
+          <div class="flex-gap gap-sm mt-2" style="flex-wrap:wrap;">
+            {% if review.cleanliness_rating %}<span class="badge badge--grey">🧹 Cleanliness: {{ review.cleanliness_rating }}/5</span>{% endif %}
+            {% if review.noise_rating %}<span class="badge badge--grey">🔇 Noise: {{ review.noise_rating }}/5</span>{% endif %}
+            {% if review.hospitality_rating %}<span class="badge badge--grey">🤝 Hospitality: {{ review.hospitality_rating }}/5</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:2rem 0;">
+          <p>No reviews yet — be the first band to stay here and leave one.</p>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ── BOOKING SIDEBAR ──────────────────────────────── -->
+    <div class="sidebar-sticky">
+      <div class="booking-widget">
+        <div class="booking-widget__price">
+          £{{ listing.price_per_night }} <span>/ night</span>
+        </div>
+
+        {% if listing.max_guests > 1 %}
+        <p class="text-muted mb-3" style="font-size:0.85rem;">Up to {{ listing.max_guests }} guest{{ listing.max_guests|pluralize }} · Max {{ listing.max_nights }} night{{ listing.max_nights|pluralize }}</p>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+          {% if user == listing.host %}
+            <div class="badge badge--grey mb-3">This is your listing</div>
+            <a href="{% url 'listings:edit' listing.pk %}" class="btn btn--outline btn--block mb-2">Edit listing</a>
+          {% elif user.is_artist %}
+            <a href="{% url 'bookings:request' listing.pk %}" class="btn btn--primary btn--block btn--lg">Request This Bunk</a>
+            <p class="text-muted mt-2" style="font-size:0.78rem; text-align:center;">You'll need to provide your gig details when booking.</p>
+          {% else %}
+            <p class="text-muted" style="font-size:0.85rem;">
+              Only artists can book bunks. 
+              <a href="{% url 'accounts:profile_edit' %}">Update your profile →</a>
+            </p>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'accounts:login' %}?next={% url 'bookings:request' listing.pk %}" class="btn btn--primary btn--block btn--lg">Log in to Book</a>
+          <p class="text-muted mt-2" style="font-size:0.78rem; text-align:center;">Don't have an account? <a href="{% url 'accounts:register' %}">Join free</a></p>
+        {% endif %}
+
+        <hr class="divider">
+
+        <!-- Listing meta -->
+        <div style="display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem;">
+          <div class="flex-between">
+            <span class="text-muted">Type</span>
+            <span>{{ listing.get_type_icon }} {{ listing.get_listing_type_display }}</span>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted">Breakfast</span>
+            <span>{% if listing.includes_breakfast %}✓ Included{% else %}✗ Not included{% endif %}</span>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted">Max guests</span>
+            <span>{{ listing.max_guests }}</span>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted">Max stay</span>
+            <span>{{ listing.max_nights }} night{{ listing.max_nights|pluralize }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report link -->
+      <p class="text-center mt-3" style="font-size:0.78rem;">
+        <a href="{% url 'core:contact' %}" class="text-muted">🚩 Report this listing</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

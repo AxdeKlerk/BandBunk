@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Booking #{{ booking.pk }}{% endblock %}
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+    <a href="{% url 'bookings:my_bookings' %}" class="text-muted" style="font-size:0.85rem;">← My Bookings</a>
+    <div class="flex-between mt-3 mb-4">
+      <h2>Booking #{{ booking.pk }}</h2>
+      {% if booking.status == 'pending' %}<span class="badge badge--amber">Pending</span>
+      {% elif booking.status == 'confirmed' %}<span class="badge badge--green">Confirmed</span>
+      {% elif booking.status == 'completed' %}<span class="badge badge--purple">Completed</span>
+      {% elif booking.status == 'declined' %}<span class="badge badge--red">Declined</span>
+      {% else %}<span class="badge badge--grey">{{ booking.get_status_display }}</span>{% endif %}
+    </div>
+    <div class="card p-4 mb-3">
+      <h5 class="mb-3">Stay Details</h5>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.9rem;">
+        <div><span class="label">Listing</span><p class="mt-1"><a href="{% url 'listings:detail' booking.listing.pk %}">{{ booking.listing.title }}</a></p></div>
+        <div><span class="label">Location</span><p class="mt-1">{{ booking.listing.town_city }}</p></div>
+        <div><span class="label">Check-in</span><p class="mt-1">{{ booking.check_in|date:"l d F Y" }}</p></div>
+        <div><span class="label">Check-out</span><p class="mt-1">{{ booking.check_out|date:"l d F Y" }}</p></div>
+        <div><span class="label">Nights</span><p class="mt-1">{{ booking.num_nights }}</p></div>
+        <div><span class="label">Total</span><p class="mt-1" style="color:var(--purple-bright); font-family:var(--font-display); font-size:1.3rem;">£{{ booking.total_price }}</p></div>
+      </div>
+    </div>
+    <div class="card p-4 mb-3">
+      <h5 class="mb-3">Gig Verification</h5>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.9rem;">
+        <div><span class="label">Band</span><p class="mt-1">{{ booking.band_name }}</p></div>
+        <div><span class="label">Gig date</span><p class="mt-1">{{ booking.gig_date|date:"l d F Y" }}</p></div>
+        <div><span class="label">Venue</span><p class="mt-1">{{ booking.venue_name }}</p></div>
+        <div><span class="label">Venue address</span><p class="mt-1">{{ booking.venue_address }}</p></div>
+      </div>
+      <div class="mt-3"><span class="label">Event link</span><p class="mt-1"><a href="{{ booking.social_proof_url }}" target="_blank">{{ booking.social_proof_url }}</a></p></div>
+    </div>
+    {% if booking.status == 'confirmed' %}
+    <div class="card p-4 mb-3" style="border-color:var(--green);">
+      <h5 class="mb-2" style="color:var(--green);">✓ Confirmed Address</h5>
+      <p>{{ booking.listing.address_line1 }}{% if booking.listing.address_line2 %}, {{ booking.listing.address_line2 }}{% endif %}, {{ booking.listing.town_city }}, {{ booking.listing.postcode }}</p>
+    </div>
+
+    <div class="card p-4 mb-3">
+      <h5 class="mb-2">Payment</h5>
+      {% if booking.payment_status == 'paid' %}
+        <span class="badge badge--green">Paid</span>
+        <p class="mt-2 text-muted" style="font-size:0.85rem;">£{{ booking.total_price }} received.</p>
+      {% elif booking.artist == request.user %}
+        {% if booking.payment_status == 'processing' %}
+          <span class="badge badge--amber">Processing</span>
+        {% endif %}
+        <p class="mt-2" style="font-size:0.9rem;">£{{ booking.total_price }} due for this stay.</p>
+        <a href="{% url 'bookings:pay' booking.pk %}" class="btn btn--primary mt-2">Pay Now</a>
+      {% else %}
+        <span class="badge badge--amber">Awaiting payment from artist</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <h1 class="mb-4">My Bookings</h1>
+
+  <div class="dashboard-tabs">
+    <a href="#as-artist" class="dashboard-tab active" onclick="switchTab(this,'as-artist')">As Artist</a>
+    {% if bookings_as_host %}
+    <a href="#as-host" class="dashboard-tab" onclick="switchTab(this,'as-host')">As Host</a>
+    {% endif %}
+  </div>
+
+  <!-- AS ARTIST -->
+  <div id="as-artist" class="tab-panel">
+    {% if bookings_as_artist %}
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      {% for booking in bookings_as_artist %}
+      <div class="card p-4">
+        <div class="flex-between mb-2" style="flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <h5 class="mb-0">{{ booking.listing.title }}</h5>
+            <p class="text-muted" style="font-size:0.85rem;">{{ booking.listing.town_city }} · {{ booking.check_in|date:"d M Y" }} → {{ booking.check_out|date:"d M Y" }} ({{ booking.num_nights }} night{{ booking.num_nights|pluralize }})</p>
+          </div>
+          {% if booking.status == 'pending' %}
+            <span class="badge badge--amber">Pending</span>
+          {% elif booking.status == 'confirmed' %}
+            <span class="badge badge--green">Confirmed ✓</span>
+          {% elif booking.status == 'completed' %}
+            <span class="badge badge--purple">Completed</span>
+          {% elif booking.status == 'declined' %}
+            <span class="badge badge--red">Declined</span>
+          {% elif booking.status == 'cancelled' %}
+            <span class="badge badge--grey">Cancelled</span>
+          {% endif %}
+        </div>
+
+        <div class="flex-gap" style="flex-wrap:wrap; font-size:0.85rem; color:var(--grey-2); margin-bottom:1rem;">
+          <span>🎸 {{ booking.band_name }}</span>
+          <span>📍 {{ booking.venue_name }}</span>
+          <span>🗓️ Gig: {{ booking.gig_date|date:"d M Y" }}</span>
+          <span style="color:var(--purple-bright);">£{{ booking.total_price }}</span>
+        </div>
+
+        {% if booking.host_response %}
+        <div style="background:var(--dark-2); border-left:3px solid var(--purple); padding:0.75rem 1rem; border-radius:0 var(--radius-sm) var(--radius-sm) 0; margin-bottom:1rem; font-size:0.88rem;">
+          <span class="label" style="display:block; margin-bottom:0.3rem;">Host said:</span>
+          {{ booking.host_response }}
+        </div>
+        {% endif %}
+
+        {% if booking.status == 'confirmed' %}
+        <div style="background:var(--dark-2); border:1px solid var(--dark-4); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.85rem;">
+          <strong>Address:</strong> {{ booking.listing.address_line1 }}, {{ booking.listing.town_city }}, {{ booking.listing.postcode }}
+        </div>
+        {% endif %}
+
+        <div class="flex-gap" style="flex-wrap:wrap;">
+          <a href="{% url 'bookings:detail' booking.pk %}" class="btn btn--ghost btn--sm">View details</a>
+          {% if booking.status in 'pending,confirmed' %}
+            <a href="{% url 'bookings:cancel' booking.pk %}" class="btn btn--danger btn--sm"
+               data-confirm="Are you sure you want to cancel this booking?">Cancel</a>
+          {% endif %}
+          {% if booking.status == 'completed' and booking.can_be_reviewed_by %}
+            <a href="{% url 'reviews:leave' booking.pk 'host' %}" class="btn btn--outline btn--sm">★ Review host</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-state__icon">🎸</span>
+      <h3>No bookings yet</h3>
+      <p>Find a bunk near your next gig.</p>
+      <a href="{% url 'listings:browse' %}" class="btn btn--primary mt-3">Find A Bunk</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- AS HOST -->
+  {% if bookings_as_host %}
+  <div id="as-host" class="tab-panel" style="display:none;">
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      {% for booking in bookings_as_host %}
+      <div class="card p-4">
+        <div class="flex-between mb-2" style="flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <h5 class="mb-0">{{ booking.band_name }}</h5>
+            <p class="text-muted" style="font-size:0.85rem;">{{ booking.listing.title }} · {{ booking.check_in|date:"d M Y" }} → {{ booking.check_out|date:"d M Y" }}</p>
+          </div>
+          {% if booking.status == 'pending' %}
+            <span class="badge badge--amber">Awaiting your response</span>
+          {% elif booking.status == 'confirmed' %}
+            <span class="badge badge--green">Confirmed</span>
+          {% elif booking.status == 'completed' %}
+            <span class="badge badge--purple">Completed</span>
+          {% elif booking.status == 'declined' %}
+            <span class="badge badge--red">Declined</span>
+          {% elif booking.status == 'cancelled' %}
+            <span class="badge badge--grey">Cancelled</span>
+          {% endif %}
+        </div>
+
+        <div class="flex-gap" style="flex-wrap:wrap; font-size:0.85rem; color:var(--grey-2); margin-bottom:0.75rem;">
+          <span>👤 {{ booking.artist.username }}</span>
+          <span>📍 Playing at: {{ booking.venue_name }}</span>
+          <span>🗓️ Gig: {{ booking.gig_date|date:"d M Y" }}</span>
+          <a href="{{ booking.social_proof_url }}" target="_blank" style="color:var(--purple-glow);">🔗 Verify gig</a>
+          <span style="color:var(--purple-bright);">£{{ booking.total_price }}</span>
+        </div>
+
+        {% if booking.message_to_host %}
+        <div style="background:var(--dark-2); border-left:3px solid var(--dark-4); padding:0.75rem 1rem; border-radius:0 var(--radius-sm) var(--radius-sm) 0; margin-bottom:1rem; font-size:0.88rem;">
+          <span class="label" style="display:block; margin-bottom:0.3rem;">Artist's message:</span>
+          {{ booking.message_to_host }}
+        </div>
+        {% endif %}
+
+        <!-- Host respond buttons -->
+        {% if booking.status == 'pending' %}
+        <form method="post" action="{% url 'bookings:respond' booking.pk %}" style="display:contents;">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="host_response_{{ booking.pk }}">Optional message to artist</label>
+            <textarea name="host_response" id="host_response_{{ booking.pk }}" rows="2" placeholder="Welcome message, parking info, anything useful..."></textarea>
+          </div>
+          <div class="flex-gap">
+            <button type="submit" name="action" value="confirm" class="btn btn--success">✓ Confirm booking</button>
+            <button type="submit" name="action" value="decline" class="btn btn--danger"
+                    data-confirm="Decline this booking request?">✗ Decline</button>
+          </div>
+        </form>
+        {% endif %}
+
+        {% if booking.status == 'confirmed' %}
+        <div class="flex-gap mt-2">
+          <a href="{% url 'bookings:complete' booking.pk %}" class="btn btn--outline btn--sm"
+             data-confirm="Mark this stay as complete?">Mark as complete</a>
+        </div>
+        {% endif %}
+
+        {% if booking.status == 'completed' %}
+        <div class="flex-gap mt-2">
+          <a href="{% url 'reviews:leave' booking.pk 'artist' %}" class="btn btn--outline btn--sm">★ Review {{ booking.band_name }}</a>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function switchTab(el, panelId) {
+  document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  el.classList.add('active');
+  document.getElementById(panelId).style.display = 'block';
+  return false;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Map — Find A Bunk{% endblock %}
+
+{% block content %}
+<div style="height:calc(100vh - 64px); display:flex; flex-direction:column;">
+
+  <!-- Top bar -->
+  <div style="background:var(--dark-1); border-bottom:1px solid var(--dark-3); padding:0.75rem 1.5rem; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+    <h4 class="mb-0">🗺️ Bunks Near You</h4>
+    <a href="{% url 'listings:browse' %}" class="btn btn--ghost btn--sm">← List view</a>
+  </div>
+
+  <!-- Map fills remaining height -->
+  <div style="flex:1; position:relative;">
+    <div id="map" style="width:100%; height:100%; border-radius:0; border:none;"></div>
+
+    <!-- Legend -->
+    <div style="position:absolute; bottom:1.5rem; left:1.5rem; z-index:1000; background:rgba(0,0,0,0.85); border:1px solid var(--purple-border); border-radius:var(--radius-md); padding:0.75rem 1rem; backdrop-filter:blur(8px);">
+      <p class="label mb-2">Listing types</p>
+      <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.82rem; color:var(--grey-1);">
+        <span>🛋️ Sofa</span>
+        <span>🚪 Spare Room</span>
+        <span>💨 Floor Space</span>
+        <span>🎸 Garage / Rehearsal</span>
+      </div>
+    </div>
+
+    {% if not listings_json or listings_json == '[]' %}
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1000; background:rgba(0,0,0,0.9); border:1px solid var(--purple-border); border-radius:var(--radius-lg); padding:2rem 3rem; text-align:center; backdrop-filter:blur(8px);">
+      <span style="font-size:3rem; display:block; margin-bottom:1rem;">🗺️</span>
+      <h4>No listings on the map yet</h4>
+      <p class="text-muted mt-2">Listings appear here once hosts add their coordinates.</p>
+      <a href="{% url 'listings:browse' %}" class="btn btn--primary mt-3">Browse all listings</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const listingsData = {{ listings_json|safe }};
+document.addEventListener('DOMContentLoaded', () => {
+  initMap(listingsData, { center: [52.5, -1.8], zoom: 6 });
+});
+</script>
+{% endblock %}

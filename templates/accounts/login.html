@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Log In — BandBunk{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div style="max-width:460px; margin:0 auto;">
+
+    <div class="text-center mb-4">
+      <div style="font-family:var(--font-display); font-size:3rem; color:var(--white); margin-bottom:0.5rem;">
+        Band<span style="color:var(--purple-bright);">Bunk</span>
+      </div>
+      <p class="text-muted">Welcome back. The gig won't play itself.</p>
+    </div>
+
+    <div class="card p-4">
+      <h3 class="mb-4">Log In</h3>
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}<p class="form-error">{{ form.username.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}<p class="form-error">{{ form.password.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error mb-3">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn--primary btn--block btn--lg mt-2">Log In</button>
+      </form>
+    </div>
+
+    <p class="text-center mt-3 text-muted">
+      Don't have an account? <a href="{% url 'accounts:register' %}">Join free →</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Post a Listing{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+    <h1 class="mb-2">Post Your Bunk</h1>
+    <p class="text-muted mb-4">Got a sofa, spare room, or garage? Let a band crash there for £10 a night.</p>
+
+    <div class="card p-4">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <h5 class="mb-3">The Basics</h5>
+
+        <div class="form-group">
+          <label>Listing title</label>
+          {{ form.title }}
+          <p class="form-help">E.g. "Comfy sofa in Digbeth" or "Spare room near The Venue"</p>
+          {% if form.title.errors %}<p class="form-error">{{ form.title.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label>Type of accommodation</label>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; margin-top:0.5rem;">
+            {% for val, label in form.fields.listing_type.choices %}
+            <label class="form-check type-card" style="background:var(--dark-2); border:1px solid var(--dark-4); border-radius:var(--radius-md); padding:1rem; flex-direction:column; gap:0.5rem; cursor:pointer; transition:border-color 0.2s;">
+              <input type="radio" name="listing_type" value="{{ val }}" {% if form.listing_type.value == val %}checked{% endif %}>
+              <span style="font-size:1.4rem;">{% if val == 'sofa' %}🛋️{% elif val == 'spare_room' %}🚪{% elif val == 'floor_space' %}💨{% else %}🎸{% endif %}</span>
+              <strong style="color:var(--white); font-size:0.88rem;">{{ label }}</strong>
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.listing_type.errors %}<p class="form-error">{{ form.listing_type.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          {{ form.description }}
+          <p class="form-help">What's the setup? Access, parking nearby, what to expect in the morning?</p>
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Location</h5>
+        <p class="text-muted mb-3" style="font-size:0.85rem;">Your full address is only shared with confirmed bookings. Artists only see your town/city when browsing.</p>
+
+        <div class="form-group">
+          <label>Address line 1</label>
+          {{ form.address_line1 }}
+        </div>
+        <div class="form-group">
+          <label>Address line 2 (optional)</label>
+          {{ form.address_line2 }}
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Town / City</label>
+            {{ form.town_city }}
+            {% if form.town_city.errors %}<p class="form-error">{{ form.town_city.errors|join:", " }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label>Postcode</label>
+            {{ form.postcode }}
+            {% if form.postcode.errors %}<p class="form-error">{{ form.postcode.errors|join:", " }}</p>{% endif %}
+          </div>
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Pricing & Capacity</h5>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price per night (£ minimum 10)</label>
+            {{ form.price_per_night }}
+            {% if form.price_per_night.errors %}<p class="form-error">{{ form.price_per_night.errors|join:", " }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label>Max guests</label>
+            {{ form.max_guests }}
+          </div>
+        </div>
+        <div class="form-group" style="max-width:200px;">
+          <label>Max consecutive nights</label>
+          {{ form.max_nights }}
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Amenities</h5>
+
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem;">
+          <label class="form-check">{{ form.includes_breakfast }} Tea/coffee & toast included</label>
+          <label class="form-check">{{ form.has_wifi }} WiFi available</label>
+          <label class="form-check">{{ form.has_parking }} Parking nearby</label>
+          <label class="form-check">{{ form.allows_instruments }} Instruments welcome</label>
+          <label class="form-check">{{ form.is_pet_friendly }} Pet friendly</label>
+          <label class="form-check">{{ form.has_shower }} Shower available</label>
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">House Rules (optional)</h5>
+        <div class="form-group">
+          <label>House rules</label>
+          {{ form.house_rules }}
+        </div>
+        <div class="form-group" style="max-width:200px;">
+          <label>Noise curfew time (optional)</label>
+          {{ form.noise_curfew }}
+        </div>
+
+        <hr class="divider">
+        <h5 class="mb-3">Photos</h5>
+        <div class="form-group">
+          <label>Upload photos of your space</label>
+          <input type="file" name="photos" accept="image/*" multiple style="margin-top:0.5rem;">
+          <p class="form-help">Show bands exactly what they're getting. Good photos = more bookings.</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error mb-3">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="flex-gap mt-4">
+          <button type="submit" class="btn btn--primary btn--lg">Publish Listing 🛋️</button>
+          <a href="{% url 'listings:my_listings' %}" class="btn btn--ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.type-card input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.type-card').forEach(c => c.style.borderColor = 'var(--dark-4)');
+    radio.closest('.type-card').style.borderColor = 'var(--purple)';
+  });
+  if (radio.checked) radio.closest('.type-card').style.borderColor = 'var(--purple)';
+});
+</script>
+{% endblock %}

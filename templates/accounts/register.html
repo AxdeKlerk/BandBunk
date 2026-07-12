@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Join BandBunk{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+  <div class="container--narrow" style="margin:0 auto;">
+
+    <div class="text-center mb-4">
+      <h1 class="mb-2">Join BandBunk</h1>
+      <p class="text-muted">Fans with sofas. Bands that need them. £10 a night.</p>
+    </div>
+
+    <div class="card p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- User type selector -->
+        <div class="form-group mb-4">
+          <label>I am joining as...</label>
+          <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+            {% for choice in form.user_type %}
+            <label class="form-check" style="background:var(--dark-2); border:1px solid var(--dark-4); border-radius:var(--radius-md); padding:1rem; cursor:pointer; transition:border-color 0.2s;">
+              {{ choice.tag }}
+              <div>
+                <strong style="color:var(--white); font-size:0.95rem;">{{ choice.choice_label }}</strong>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.user_type.errors %}<p class="form-error">{{ form.user_type.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <hr class="divider">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.first_name.id_for_label }}">First name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.last_name.id_for_label }}">Last name</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}<p class="form-error">{{ form.username.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">Email address</label>
+          {{ form.email }}
+          {% if form.email.errors %}<p class="form-error">{{ form.email.errors|join:", " }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<p class="form-error">{{ form.password1.errors|join:", " }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<p class="form-error">{{ form.password2.errors|join:", " }}</p>{% endif %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error mb-3">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn--primary btn--block btn--lg mt-2">Create Account 🤘</button>
+
+        <p class="text-center text-muted mt-3" style="font-size:0.82rem;">
+          By joining you agree to our <a href="{% url 'core:terms' %}">Terms</a> and <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
+        </p>
+      </form>
+    </div>
+
+    <p class="text-center mt-3 text-muted">
+      Already have an account? <a href="{% url 'accounts:login' %}">Log in →</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Highlight selected user type card
+document.querySelectorAll('.form-check input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.form-check').forEach(el => {
+      el.style.borderColor = 'var(--dark-4)';
+    });
+    radio.closest('.form-check').style.borderColor = 'var(--purple)';
+  });
+  if (radio.checked) {
+    radio.closest('.form-check').style.borderColor = 'var(--purple)';
+  }
+});
+</script>
+{% endblock %}

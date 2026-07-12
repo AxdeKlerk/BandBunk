@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}How It Works{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="container--narrow" style="margin:0 auto;">
+    <div class="section-header">
+      <span class="label">The mechanics</span>
+      <h1>How BandBunk Works</h1>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:3rem;">
+
+      <div class="flex-gap" style="align-items:flex-start; gap:2rem;">
+        <div style="font-family:var(--font-display); font-size:3rem; color:var(--purple-bright); min-width:60px; line-height:1;">01</div>
+        <div>
+          <h3 class="mb-2">Create Your Account</h3>
+          <p>Sign up as a <strong>Host</strong> (you have space to offer), an <strong>Artist</strong> (you need somewhere to crash), or both. Artists must link at least one social or music profile — Facebook, Instagram, YouTube, Bandcamp, or Spotify — so hosts can see you're a real band.</p>
+        </div>
+      </div>
+
+      <div class="flex-gap" style="align-items:flex-start; gap:2rem;">
+        <div style="font-family:var(--font-display); font-size:3rem; color:var(--purple-bright); min-width:60px; line-height:1;">02</div>
+        <div>
+          <h3 class="mb-2">Hosts Post Their Space</h3>
+          <p>If you're a fan with a spare sofa, room, floor, or garage, post it. Set your listing type, add a description, amenities, and a price — minimum £10 per night. You decide how many guests and how many nights.</p>
+          <div class="amenities mt-3">
+            <span class="amenity amenity--active">🛋️ Sofa</span>
+            <span class="amenity amenity--active">🚪 Spare Room</span>
+            <span class="amenity amenity--active">💨 Floor Space</span>
+            <span class="amenity amenity--active">🎸 Garage / Rehearsal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-gap" style="align-items:flex-start; gap:2rem;">
+        <div style="font-family:var(--font-display); font-size:3rem; color:var(--purple-bright); min-width:60px; line-height:1;">03</div>
+        <div>
+          <h3 class="mb-2">Artists Request a Bunk</h3>
+          <p>Browse or search by town/city. Find a listing near your gig. When you request, you must supply: your band name, the venue you're playing, the gig date, and a link to your event listing (Facebook event, Eventbrite, Instagram post — anything that verifies you're really playing).</p>
+          <p class="mt-2">This is non-negotiable. Hosts need to know you're genuine before they open their front door.</p>
+        </div>
+      </div>
+
+      <div class="flex-gap" style="align-items:flex-start; gap:2rem;">
+        <div style="font-family:var(--font-display); font-size:3rem; color:var(--purple-bright); min-width:60px; line-height:1;">04</div>
+        <div>
+          <h3 class="mb-2">Host Reviews & Confirms</h3>
+          <p>The host gets an email with your gig details and social link. They verify you're real, then confirm or decline. Once confirmed, you get the full address and payment is processed through Stripe.</p>
+        </div>
+      </div>
+
+      <div class="flex-gap" style="align-items:flex-start; gap:2rem;">
+        <div style="font-family:var(--font-display); font-size:3rem; color:var(--purple-bright); min-width:60px; line-height:1;">05</div>
+        <div>
+          <h3 class="mb-2">You Play. You Sleep. You Leave Reviews.</h3>
+          <p>After the stay, both sides rate each other. Hosts rate the band (did they respect the space?). Artists rate the host (was the sofa what was advertised? Did the kettle work?). Reviews are public and permanent — the community polices itself.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card p-4 mt-6" style="border-color:var(--purple-border); background:var(--purple-bg);">
+      <h4 class="mb-2">The £10 Rule</h4>
+      <p>Every stay is a minimum of £10 per night. In return, the host provides at the very minimum: a safe place to sleep, a mug of tea or coffee, and a slice of toast in the morning. Hosts can charge more if they offer more. This isn't a charity — it's a community with standards.</p>
+    </div>
+
+    <div class="flex-center mt-6" style="gap:1rem; flex-wrap:wrap;">
+      <a href="{% url 'listings:browse' %}" class="btn btn--primary btn--lg">Find A Bunk</a>
+      <a href="{% url 'listings:create' %}" class="btn btn--outline btn--lg">Post Your Space</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

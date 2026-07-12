@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find A Bunk{% endblock %}
+
+{% block content %}
+<div class="container section--sm">
+
+  <!-- Page header & search -->
+  <div class="page-header">
+    <h1 class="mb-3">Find A Bunk</h1>
+    <form method="get" class="search-bar" style="max-width:720px;">
+      <input type="text" name="q" value="{{ form.q.value|default:'' }}" placeholder="Town, city or postcode...">
+      <select name="type">
+        {% for val, label in form.fields.type.choices %}
+        <option value="{{ val }}" {% if form.type.value == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="max_price" value="{{ form.max_price.value|default:'' }}" placeholder="Max £/night" style="border:none; border-left:1px solid var(--dark-4); background:var(--dark-2); width:120px; border-radius:0;">
+      <button type="submit" class="btn btn--primary">Search</button>
+    </form>
+  </div>
+
+  <!-- Results count -->
+  <div class="flex-between mb-4">
+    <p class="text-muted">
+      {% if count %}{{ count }} bunk{{ count|pluralize }} available{% else %}No bunks found — try a broader search{% endif %}
+    </p>
+    <a href="{% url 'listings:map' %}" class="btn btn--ghost btn--sm">🗺️ Map view</a>
+  </div>
+
+  <!-- Listings grid -->
+  {% if listings %}
+  <div class="grid grid-3">
+    {% for listing in listings %}
+    <a href="{% url 'listings:detail' listing.pk %}" class="card card--hover listing-card">
+      <div class="listing-card__image-wrap">
+        {% with listing.photos.first as photo %}
+          {% if photo %}
+            <img src="{{ photo.image.url }}" alt="{{ listing.title }}">
+          {% else %}
+            <div class="listing-card__no-image">{{ listing.get_type_icon }}</div>
+          {% endif %}
+        {% endwith %}
+        <span class="listing-card__type-badge">{{ listing.get_listing_type_display }}</span>
+      </div>
+      <div class="card__body">
+        <h5 class="mb-1">{{ listing.title }}</h5>
+        <p class="text-muted mb-2" style="font-size:0.85rem;">{{ listing.town_city }}{% if listing.postcode %}, {{ listing.postcode }}{% endif %}</p>
+        <div class="amenities mb-2">
+          {% if listing.includes_breakfast %}<span class="amenity amenity--active">☕ Breakfast</span>{% endif %}
+          {% if listing.has_wifi %}<span class="amenity">📶 WiFi</span>{% endif %}
+          {% if listing.allows_instruments %}<span class="amenity">🎸 Instruments OK</span>{% endif %}
+        </div>
+        <div class="flex-between">
+          <span style="font-family:var(--font-display); font-size:1.4rem;">
+            £{{ listing.price_per_night }}<span style="font-family:var(--font-body); font-size:0.8rem; color:var(--grey-2);">/night</span>
+          </span>
+          {% with listing.average_rating as rating %}
+          {% if rating %}
+            <span class="badge badge--purple">★ {{ rating }} ({{ listing.review_count }})</span>
+          {% else %}
+            <span class="badge badge--grey">No reviews yet</span>
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+      <div class="card__footer">
+        <span class="text-muted" style="font-size:0.8rem;">Hosted by</span>
+        <span style="font-size:0.85rem; color:var(--grey-1);">{{ listing.host.username }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-state__icon">🛋️</span>
+    <h3>No bunks here yet</h3>
+    <p>Try a different search, or be the first to post a listing in this area.</p>
+    <a href="{% url 'listings:create' %}" class="btn btn--primary mt-3">Post a Listing</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
