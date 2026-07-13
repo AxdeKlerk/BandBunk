@@ -1,10 +1,8 @@
-/* ============================================================
-   BANDBUNK — main.js
-   ============================================================ */
+// BANDBUNK — main.js
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Mobile nav toggle ───────────────────────────────────
+  // Mobile nav toggle
   const hamburger = document.getElementById('hamburger');
   const mainNav   = document.getElementById('main-nav');
   if (hamburger && mainNav) {
@@ -18,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Auto-dismiss messages after 5 seconds ───────────────
+  // Auto-dismiss messages after 5 seconds
   const messages = document.querySelectorAll('.alert');
   messages.forEach(msg => {
     setTimeout(() => {
@@ -28,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   });
 
-  // ── Star rating inputs ───────────────────────────────────
+  // Star rating inputs
   document.querySelectorAll('.star-rating-input').forEach(widget => {
     const labels = widget.querySelectorAll('label');
     labels.forEach(label => {
@@ -38,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Image preview for file inputs ───────────────────────
+  // Image preview for file inputs
   document.querySelectorAll('input[type="file"][data-preview]').forEach(input => {
     const previewId = input.dataset.preview;
     const preview   = document.getElementById(previewId);
@@ -56,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Date validation: check-out must be after check-in ───
+  // Date validation: check-out must be after check-in
   const checkIn  = document.getElementById('id_check_in');
   const checkOut = document.getElementById('id_check_out');
   if (checkIn && checkOut) {
@@ -68,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Confirm before destructive actions ──────────────────
+  // Confirm before destructive actions
   document.querySelectorAll('[data-confirm]').forEach(el => {
     el.addEventListener('click', (e) => {
       if (!confirm(el.dataset.confirm)) {
@@ -77,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Animate elements on scroll (IntersectionObserver) ───
+  // Animate elements on scroll (IntersectionObserver)
   const fadeEls = document.querySelectorAll('.fade-up');
   if ('IntersectionObserver' in window && fadeEls.length) {
     const observer = new IntersectionObserver((entries) => {
@@ -94,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Listing type icon helper ─────────────────────────────
+  // Listing type icon helper
   window.getListingIcon = (type) => {
     const icons = {
       sofa: '🛋️',
@@ -105,13 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return icons[type] || '🏠';
   };
 
-  // ── Format price ─────────────────────────────────────────
+  // Format price
   window.formatPrice = (p) => `£${parseFloat(p).toFixed(2)}`;
 
 });
 
 
-/* ── Map initialisation (called from map templates) ───────── */
+// Map initialisation (called from map templates) 
 window.initMap = (listings, options = {}) => {
   const mapEl = document.getElementById('map');
   if (!mapEl) return;
