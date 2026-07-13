@@ -15,7 +15,7 @@
 
 <body>
 
-  <!-- NAVBAR -->
+  <!-- Navbar -->
   <nav class="navbar">
     <a href="/" class="navbar__logo">
       Band<span>Bunk</span>
@@ -47,7 +47,7 @@
     </button>
   </nav>
 
-  <!-- ── MESSAGES ─────────────────────────────────────── -->
+  <!-- Messages -->
   {% if messages %}
   <div class="messages" id="messages">
     {% for message in messages %}
@@ -59,12 +59,12 @@
   </div>
   {% endif %}
 
-  <!-- ── MAIN CONTENT ──────────────────────────────────── -->
+  <!-- Main Content -->
   <main id="main-content">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ── FOOTER ────────────────────────────────────────── -->
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="grid grid-4" style="gap:2.5rem;">
@@ -111,7 +111,7 @@
     </div>
   </footer>
 
-  <!-- ── SCRIPTS ────────────────────────────────────────── -->
+  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_scripts %}{% endblock %}

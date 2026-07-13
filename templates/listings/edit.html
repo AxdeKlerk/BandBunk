@@ -13,23 +13,29 @@
         <div class="form-group"><label>Title</label>{{ form.title }}</div>
         <div class="form-group"><label>Type</label>{{ form.listing_type }}</div>
         <div class="form-group"><label>Description</label>{{ form.description }}</div>
+
         <hr class="divider">
         <h5 class="mb-3">Location</h5>
+
         <div class="form-group"><label>Address line 1</label>{{ form.address_line1 }}</div>
         <div class="form-group"><label>Address line 2</label>{{ form.address_line2 }}</div>
         <div class="form-row">
           <div class="form-group"><label>Town / City</label>{{ form.town_city }}</div>
           <div class="form-group"><label>Postcode</label>{{ form.postcode }}</div>
         </div>
+
         <hr class="divider">
         <h5 class="mb-3">Pricing & Capacity</h5>
+
         <div class="form-row">
           <div class="form-group"><label>Price per night (£)</label>{{ form.price_per_night }}</div>
           <div class="form-group"><label>Max guests</label>{{ form.max_guests }}</div>
         </div>
         <div class="form-group" style="max-width:200px;"><label>Max nights</label>{{ form.max_nights }}</div>
+
         <hr class="divider">
         <h5 class="mb-3">Amenities</h5>
+
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem;">
           <label class="form-check">{{ form.includes_breakfast }} Tea/coffee & toast</label>
           <label class="form-check">{{ form.has_wifi }} WiFi</label>
@@ -38,10 +44,14 @@
           <label class="form-check">{{ form.is_pet_friendly }} Pet friendly</label>
           <label class="form-check">{{ form.has_shower }} Shower</label>
         </div>
+
         <hr class="divider">
+
         <div class="form-group"><label>House rules</label>{{ form.house_rules }}</div>
         <div class="form-group" style="max-width:200px;"><label>Noise curfew</label>{{ form.noise_curfew }}</div>
+
         <hr class="divider">
+        
         <div class="form-group">
           <label>Add more photos</label>
           <input type="file" name="photos" accept="image/*" multiple style="margin-top:0.5rem;">
